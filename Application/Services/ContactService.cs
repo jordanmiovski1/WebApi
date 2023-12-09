@@ -26,6 +26,7 @@ namespace Application.Services
 
         public async Task<IEnumerable<object>> GetContactsWithCompanyAndCountry()
         {
+            //test
             var contacts = await _context.Contact
                                 .Include(c => c.Company)
                                 .Include(c => c.Country)
