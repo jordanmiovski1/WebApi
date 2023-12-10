@@ -1,4 +1,5 @@
 ﻿using Core.DbEntities;
+using Core.WebEntities.Country;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,12 @@ namespace Core.Interfaces
 {
     public interface ICountryService
     {
-        Task<IEnumerable<Country>> GetAllCountries();
-        Task<Country> CreateCountry(Country country);
-        Task UpdateCountry(int id, Country country);
+        Task<IEnumerable<CountryDTO>> GetAllCountries();
+
+        Task<CountryDTO> CreateCountry(CountryInsertDTO country);
+
+        Task UpdateCountry(CountryDTO country);
+
         Task DeleteCountry(int id);
     }
 }

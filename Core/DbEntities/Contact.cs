@@ -11,17 +11,25 @@ namespace Core.DbEntities
     public class Contact
     {
         public int ContactId { get; set; }
+
         [Required]
+
         public string ContactName { get; set; }
+
         [Required]
+
         [ForeignKey("Company")]
+
         public int CompanyId { get; set; }
+
         [Required]
+
         [ForeignKey("Country")]
+
         public int CountryId { get; set; }
 
-
         public Company Company { get; set; }
+
         public Country Country { get; set; }
     }
 }

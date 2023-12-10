@@ -1,5 +1,7 @@
 ﻿using Core.DbEntities;
 using Core.Interfaces;
+using Core.WebEntities.Company;
+using Core.WebEntities.Contact;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Application.Services
 {
@@ -19,20 +22,23 @@ namespace Application.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Contact>> GetAllContacts()
+        public async Task<IEnumerable<ContactDTO>> GetAllContacts()
         {
-            return await _context.Contact.ToListAsync();
+            return MapToModify(await _context.Contact.ToListAsync());
         }
 
-        public async Task<IEnumerable<object>> GetContactsWithCompanyAndCountry()
+        public async Task<IEnumerable<ContactsWithCompanyAndCountryDTO>> GetContactsWithCompanyAndCountry()
         {
             //test
             var contacts = await _context.Contact
                                 .Include(c => c.Company)
                                 .Include(c => c.Country)
                                 .Select(c => new
+                                ContactsWithCompanyAndCountryDTO
                                 {
-                                    c.ContactName,
+                                    ContactName = c.ContactName,
+                                 // CompanyId = c.CompanyId,
+                                //  CountryId = c.CountryId,
                                     CompanyName = c.Company.CompanyName,
                                     CountryName = c.Country.CountryName
                                 })
@@ -40,7 +46,7 @@ namespace Application.Services
             return contacts;
         }
 
-        public async Task<IEnumerable<Contact>> FilterContact(int? countryId, int? companyId)
+        public async Task<IEnumerable<ContactDTO>> FilterContact(int? countryId, int? companyId)
         {
             IQueryable<Contact> query = _context.Contact;
 
@@ -55,34 +61,43 @@ namespace Application.Services
             }
 
             var filteredContacts = await query.ToListAsync();
-            return filteredContacts;
+            return MapToModify(filteredContacts);
         }
 
-        public async Task<Contact> CreateContact(Contact contact)
+        public async Task<ContactDTO> CreateContact(ContactInsertDTO contact)
         {
-            _context.Contact.Add(contact);
-            await _context.SaveChangesAsync();
-            return contact;
-        }
-
-        public async Task UpdateContact(int id, Contact contact)
-        {
-            if (id != contact.ContactId)
+            var contactToInsert = new Contact()
             {
-                throw new Exception("Record not found!");
-            }
+                ContactName = contact.ContactName,
+                CompanyId = contact.CompanyId,
+                CountryId = contact.CountryId
+            };
+            _context.Contact.Add(contactToInsert);
+            await _context.SaveChangesAsync();
+            return MapToModify(contactToInsert);
+        }
 
-            _context.Entry(contact).State = EntityState.Modified;
-
+        public async Task UpdateContact(ContactDTO contact)
+        {
             try
             {
-                await _context.SaveChangesAsync();
+                var contactDb = await _context.Contact.FindAsync(contact.Id);
+                if (contactDb == null)
+                    throw new Exception("Record not found!");
 
+                contactDb.ContactName = contact.ContactName;
+                contactDb.CompanyId = contact.CompanyId;
+                contactDb.CountryId = contact.CountryId;
+
+                _context.Entry(contactDb).State = EntityState.Modified;
+
+                await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch
             {
-                throw ex;
+                throw;
             }
+
         }
 
         public async Task DeleteContact(int id)
@@ -96,5 +111,32 @@ namespace Application.Services
             _context.Contact.Remove(contact);
             await _context.SaveChangesAsync();
         }
+
+        #region Helpers
+
+        private IEnumerable<ContactDTO> MapToModify(List<Contact> contacts)
+        {
+            return contacts.Select(x => new ContactDTO()
+            {
+                Id = x.ContactId,
+                ContactName = x.ContactName,
+                CompanyId = x.CompanyId,
+                CountryId = x.CountryId,
+            });
+        }
+
+
+        private ContactDTO MapToModify(Contact contactToInsert)
+        {
+            return new ContactDTO()
+            {
+                Id = contactToInsert.ContactId,
+                ContactName = contactToInsert.ContactName,
+                CountryId = contactToInsert.CountryId,
+                CompanyId = contactToInsert.CompanyId
+            };
+        }
+
+        #endregion
     }
 }

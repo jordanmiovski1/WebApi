@@ -13,51 +13,34 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebApiApplication2.Controllers
 {
-    [Route("api")]
+    [Route("api/companies")]
     [ApiController]
     public class CompaniesController : ControllerBase
     {
         private readonly ICompanyService _companyService;
-        public CompaniesController(ICompanyService companyService)
+
+        public CompaniesController(ICompanyService CompanyService)
         {
-            _companyService = companyService;
+            _companyService = CompanyService;
         }
 
         // GET: api/Companies
-        [Route("companies")]
+
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CompanyDTO>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet]
+
         public async Task<IActionResult> GetCompanies()
         {
-             return Ok(await _companyService.GetAllCompanies()) ;
+            return Ok(await _companyService.GetAllCompanies());
         }
 
-        // GET: api/Companies/5
-        [HttpGet]
-        [Route("companies/{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CompanyDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Company>> GetCompany([FromQuery] int id)
-        {
-            var company=await _companyService.GetCompany(id);
-            if (company == null)
-            {
-                return NotFound();
-            }
-            
-            return Ok(company);
-        }
-
-        // PUT: api/Companies/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        // PUT: api/Companies/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
-        [Route("companies")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CompanyDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateCompany([FromBody]CompanyDTO company)
+
+        public async Task<IActionResult> UpdateCompany([FromBody] CompanyDTO company)
         {
             try
             {
@@ -71,15 +54,13 @@ namespace WebApiApplication2.Controllers
             return Ok(company);
         }
 
-
-
         // POST: api/Companies
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Route("companies")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CompanyDTO))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CompanyInsertDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateCompany([FromBody]CompanyInsertDTO company)
+
+        public async Task<IActionResult> CreateCompany([FromBody] CompanyInsertDTO company)
         {
             try
             {
@@ -87,27 +68,27 @@ namespace WebApiApplication2.Controllers
                 return Ok(companyDb);
             }
             catch (Exception ex)
-            { 
-                return BadRequest(ex);
+            {
+                return BadRequest("Error inserting Company!");
             }
         }
 
-
         // DELETE: api/Companies/5
         [HttpDelete]
-        [Route("companies/{id}")]
+        [Route("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
         public async Task<IActionResult> DeleteCompany(int id)
         {
             try
             {
-                await _companyService.DeleteCompany(id);
+                await _companyService.DeleteContact(id);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest("Error removing Company!");
             }
 
         }

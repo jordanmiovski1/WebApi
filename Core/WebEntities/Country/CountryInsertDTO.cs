@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.WebEntities.Company
+namespace Core.WebEntities.Country
 {
-    public class CompanyInsertDTO
+    public class CountryInsertDTO
     {
-        public string CompanyName { get; set; }
+        public string CountryName { get; set; }
     }
 }

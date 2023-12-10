@@ -1,6 +1,8 @@
 ﻿using Core.DbEntities;
 using Core.Interfaces;
 using Core.WebEntities.Company;
+using Core.WebEntities.Contact;
+using Core.WebEntities.Country;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class CompanyService: ICompanyService
+    public class CompanyService : ICompanyService
     {
         private readonly WebAppContext _context;
 
@@ -32,10 +34,10 @@ namespace Application.Services
 
         public async Task<CompanyDTO> CreateCompany(CompanyInsertDTO companyDTO)
         {
-            var company = new Company() { CompanyName = companyDTO.Name };
+            var company = new Company() { CompanyName = companyDTO.CompanyName };
             _context.Company.Add(company);
             await _context.SaveChangesAsync();
-            var companyResult=MapToModify(company);
+            var companyResult = MapToModify(company);
             return companyResult;
         }
 
@@ -47,18 +49,18 @@ namespace Application.Services
                 if (companyDb == null)
                     throw new Exception("Record not found!");
 
-                companyDb.CompanyName = company.Name;
+                companyDb.CompanyName = company.CompanyName;
                 _context.Entry(companyDb).State = EntityState.Modified;
 
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
-        public async Task DeleteCompany(int id)
+        public async Task DeleteContact(int id)
         {
             var company = await _context.Company.FindAsync(id);
             if (company == null)
@@ -71,12 +73,13 @@ namespace Application.Services
         }
 
         #region Helpers
+
         private IEnumerable<CompanyDTO> MapToModify(List<Company> companies)
         {
             return companies.Select(x => new CompanyDTO()
             {
                 Id = x.CompanyId,
-                Name = x.CompanyName
+                CompanyName = x.CompanyName
             });
 
         }
@@ -84,13 +87,32 @@ namespace Application.Services
 
         private CompanyDTO MapToModify(Company? company)
         {
-            if (company == null) 
+            if (company == null)
                 throw new Exception("Record not found!");
 
-            return new CompanyDTO() { Id = company.CompanyId, Name = company.CompanyName };
+            return new CompanyDTO() { Id = company.CompanyId, CompanyName = company.CompanyName };
 
         }
 
+        public Task<IEnumerable<CountryDTO>> GetAllCountries()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CountryDTO> CreateCountry(CountryInsertDTO country)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateCompany(CountryDTO country)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteCompany(int id)
+        {
+            throw new NotImplementedException();
+        }
 
         #endregion
     }

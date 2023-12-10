@@ -10,7 +10,9 @@ namespace Core.DbEntities
     public class Company
     {
         public int CompanyId { get; set; }
+
         [Required]
+
         public string CompanyName { get; set; }
 
         private ICollection<Contact> Contacts { get; set; }

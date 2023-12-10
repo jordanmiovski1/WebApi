@@ -1,5 +1,7 @@
 ﻿using Core.DbEntities;
 using Core.Interfaces;
+using Core.WebEntities.Company;
+using Core.WebEntities.Country;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class CountryService: ICountryService
+    public class CountryService : ICountryService
     {
         private readonly WebAppContext _context;
 
@@ -19,41 +21,36 @@ namespace Application.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Country>> GetAllCountries()
+        public async Task<IEnumerable<CountryDTO>> GetAllCountries()
         {
-            return await _context.Country.ToListAsync();
+            return MapToModify(await _context.Country.ToListAsync());
         }
 
-        public async Task<Country> CreateCountry(Country country)
+        public async Task<CountryDTO> CreateCountry(CountryInsertDTO country)
         {
-            _context.Country.Add(country);
+            var countryToInsert = new Country() { CountryName = country.CountryName };
+            _context.Country.Add(countryToInsert);
             await _context.SaveChangesAsync();
-            return country;
+            return MapToModify(countryToInsert);
         }
 
-        public async Task UpdateCountry(int id, Country country)
+        public async Task UpdateCountry(CountryDTO country)
         {
-            if (id != country.CountryId)
-            {
-                throw new Exception("Id incorect");
-            }
-
-            _context.Entry(country).State = EntityState.Modified;
-
             try
             {
+                var countryDb = await _context.Country.FindAsync(country.Id);
+                if (countryDb == null)
+                    throw new Exception("Record not found!");
+
+                countryDb.CountryName = country.CountryName;
+
+                _context.Entry(countryDb).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch
             {
-                if (!_context.Country.Any(e => e.CountryId == id))
-                {
-                    throw new Exception("Record not found!");
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
         }
 
@@ -68,5 +65,28 @@ namespace Application.Services
             _context.Country.Remove(country);
             await _context.SaveChangesAsync();
         }
+
+        #region Helpers
+
+        private IEnumerable<CountryDTO> MapToModify(List<Country> companies)
+        {
+            return companies.Select(x => new CountryDTO()
+            {
+                Id = x.CountryId,
+                CountryName = x.CountryName
+            });
+
+        }
+
+        private CountryDTO MapToModify(Country? country)
+        {
+            if (country == null)
+                throw new Exception("Record not found!");
+
+            return new CountryDTO() { Id = country.CountryId, CountryName = country.CountryName };
+
+        }
+
+        #endregion
     }
 }

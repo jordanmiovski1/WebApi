@@ -16,7 +16,7 @@ namespace Infrastructure.Context
         {
         }
 
-        public DbSet<Company> Company { get; set; } 
+        public DbSet<Company> Company { get; set; }
 
         public DbSet<Contact> Contact { get; set; }
 

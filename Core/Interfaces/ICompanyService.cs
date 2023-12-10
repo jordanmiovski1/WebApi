@@ -1,5 +1,6 @@
 ﻿using Core.DbEntities;
 using Core.WebEntities.Company;
+using Core.WebEntities.Contact;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +12,11 @@ namespace Core.Interfaces
     public interface ICompanyService
     {
         Task<IEnumerable<CompanyDTO>> GetAllCompanies();
-        Task<CompanyDTO> GetCompany(int id);
-        Task<CompanyDTO> CreateCompany(CompanyInsertDTO companyDTO);
-        Task UpdateCompany(CompanyDTO company);
-        Task DeleteCompany(int id);
 
+        Task<CompanyDTO> CreateCompany(CompanyInsertDTO company);
+
+        Task UpdateCompany(CompanyDTO company);
+
+        Task DeleteContact(int id);
     }
 }
